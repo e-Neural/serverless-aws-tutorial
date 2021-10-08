@@ -26,3 +26,6 @@ sls logs -f listCandidates -t
 
 # Testing
 $ curl -H "Content-Type: application/json" -X POST -d '{"fullname":"Alexandre Teixeira","email": "alexandre@e-neural.com", "experience":12}' https://gpxxsq5qg6.execute-api.us-east-1.amazonaws.com/dev/candidates
+
+# Test wscat websocket;
+npm i -g wscat

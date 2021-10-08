@@ -28,12 +28,12 @@ provider:
       Resource: "*"
 
   # optional
-  # websocketApiName: websocket-chat-${self:provider.stage}
+  websocketsApiName: websocket-chat-${self:provider.stage}
 
   # required for websocket apis
   # this selects from your payload what your "routeKey" parameter is
   # from the websocket event types on your function
-  # websocketApiRouteSelectionExpression: $request.body.action
+  websocketsApiRouteSelectionExpression: $request.body.action
 
 # plugins:
 #   - serverless-websockets-plugin
@@ -85,49 +85,30 @@ functions:
           cors: true
           authorizer: tokenValidate
 
-  # manage connection and disconnection of clients
-  # connectionManager:
-  #   handler: modules/chat/handler.connectionManager
+  # connectionHandler:
+  #   handler: modules/chat/onConnection.handler
   #   events:
   #     - websocket:
-  #         routeKey: $connect
-  #     - websocket:
-  #         routeKey: $disconnect
+  #         route: $connect
 
-  # # just in case we are getting weird / bad data
-  # # we can react to it with a sane response
-  # defaultMessages:
-  #   handler: modules/chat/handler.defaultMessage
+  # disconnectionHandler:
+  #   handler: modules/chat/onDisconnection.handler
   #   events:
   #     - websocket:
-  #         routeKey: $default
+  #         route: $disconnect
 
-  # # handle chat app messages
-  # sendMessage:
-  #   handler: modules/chat/handler.sendMessage
+  # defaultHandler:
+  #   handler: modules/chat/sendMessage.handler
   #   events:
   #     - websocket:
-  #         routeKey: sendMessage
+  #         route: message
 
-  # # Channel Subscriptions
-  # channelManager:
-  #   handler: modules/chat/handler.channelManager
-  #   events:
-  #     - websocket:
-  #         routeKey: subscribeChannel
-  #     - websocket:
-  #         routeKey: unsubscribeChannel
-
-  # # handle broadcasting all events
-  # # we do this by listening the dynamodb table stream for messages or disconnects
-  # # could even be done by sub-systems directly to dynamodb
-  # broadcast:
-  #   handler: modules/chat/handler.broadcast
-  #   events:
-  #     - stream:
-  #         type: dynamodb
-  #         arn:
-  #           Fn::GetAtt: [ApplicationDynamoDBTable, StreamArn]  
+  sayHelloHandler:
+    handler: modules/chat/sendHello.helloHandler
+    events:
+      - websocket:
+          route: hello
+          routeResponseSelectionExpression: $default 
 
 resources:
   Resources:
