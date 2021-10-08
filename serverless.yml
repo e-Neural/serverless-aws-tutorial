@@ -90,18 +90,21 @@ functions:
   #   events:
   #     - websocket:
   #         route: $connect
+  #         routeResponseSelectionExpression: $default
 
   # disconnectionHandler:
   #   handler: modules/chat/onDisconnection.handler
   #   events:
   #     - websocket:
   #         route: $disconnect
+  #         routeResponseSelectionExpression: $default
 
-  # defaultHandler:
+  # sendMessage:
   #   handler: modules/chat/sendMessage.handler
   #   events:
   #     - websocket:
-  #         route: message
+  #         route: $default
+  #         routeResponseSelectionExpression: $default
 
   sayHelloHandler:
     handler: modules/chat/sendHello.helloHandler

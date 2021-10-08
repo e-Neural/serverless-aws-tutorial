@@ -29,3 +29,6 @@ $ curl -H "Content-Type: application/json" -X POST -d '{"fullname":"Alexandre Te
 
 # Test wscat websocket;
 npm i -g wscat
+wscat -c wss://9ss478acvj.execute-api.us-east-1.amazonaws.com/dev
+{"action":"hello", "name": "Alexandrex" }
+
