@@ -9,8 +9,9 @@ provider:
   stage: dev
   region: us-east-1
   environment:
-    CANDIDATE_TABLE: candidate-${opt:stage, self:provider.stage}
+    CANDIDATE_TABLE: "candidate-${opt:stage, self:provider.stage}"
     CANDIDATE_EMAIL_TABLE: "candidate-email-${opt:stage, self:provider.stage}"
+    # DOMAIN_SUFFIX: "e-neural-${opt:stage, self:provider.stage}"
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -19,6 +20,20 @@ provider:
         - dynamodb:GetItem
         - dynamodb:PutItem
       Resource: "*"
+
+  # httpApi:
+  #   authorizers:
+  #     serviceAuthorizer:
+  #       identitySource: $request.header.Authorization
+  #       issuerUrl: 
+  #         Fn::Join:
+  #         - ''
+  #         - - 'https://cognito-idp.'
+  #           - '${opt:region, self:provider.region}'
+  #           - '.amazonaws.com/'
+  #           - Ref: serviceUserPool
+  #       audience:
+  #         - Ref: serviceUserPoolClient
 
 functions:
   candidateSubmission:
@@ -30,6 +45,8 @@ functions:
           path: candidates
           method: post
           cors: true
+          # authorizer: serviceAuthorizer
+
   listCandidates:
     handler: api/candidate.list
     memorySize: 128
@@ -38,14 +55,17 @@ functions:
       - http: 
           path: candidates
           method: get
-          cors: true     
+          cors: true
+          # authorizer: serviceAuthorizer
+
   candidateDetails:
     handler: api/candidate.get
     events:
       - http:
           path: candidates/{id}
           method: get
-          cors: true             
+          cors: true
+          # authorizer: serviceAuthorizer        
 
 resources:
   Resources:
@@ -83,3 +103,43 @@ resources:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
         TableName: ${self:provider.environment.CANDIDATE_EMAIL_TABLE}
+
+    # httpApi:
+    #   DependsOn: serviceUserPool
+    # serviceUserPool:
+    #   Type: AWS::Cognito::UserPool
+    #   Properties:
+    #     UserPoolName: service-user-pool-${opt:stage, self:provider.stage}
+    #     UsernameAttributes:
+    #       - email
+    #     AutoVerifiedAttributes:
+    #       - email
+    # serviceUserPoolClient:
+    #   Type: AWS::Cognito::UserPoolClient
+    #   Properties:
+    #     ClientName: service-user-pool-client-${opt:stage, self:provider.stage}
+    #     AllowedOAuthFlows:
+    #       - implicit
+    #     AllowedOAuthFlowsUserPoolClient: true
+    #     AllowedOAuthScopes:
+    #       - phone
+    #       - email
+    #       - openid
+    #       - profile
+    #       - aws.cognito.signin.user.admin
+    #     UserPoolId:
+    #       Ref: serviceUserPool
+    #     CallbackURLs: 
+    #       - https://localhost:3000
+    #     ExplicitAuthFlows:
+    #       - ALLOW_USER_SRP_AUTH
+    #       - ALLOW_REFRESH_TOKEN_AUTH
+    #     GenerateSecret: false
+    #     SupportedIdentityProviders: 
+    #       - COGNITO
+    # serviceUserPoolDomain:
+    #   Type: AWS::Cognito::UserPoolDomain 
+    #   Properties:
+    #     UserPoolId: 
+    #       Ref: serviceUserPool
+    #     Domain: service-user-pool-domain-${opt:stage, self:provider.stage}-${self:provider.environment.DOMAIN_SUFFIX}
