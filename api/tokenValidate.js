@@ -2,14 +2,14 @@ let jwt = require('jsonwebtoken');
 let jwkToPem = require('jwk-to-pem');
 let axios = require('axios');
 
-exports.handler = async function(event) {
+exports.handler = async function (event) {
     try {
         let encodedToken = getEncodedToken(event.authorizationToken)
-        let token = jwt.decode(encodedToken, {complete: true});
+        let token = jwt.decode(encodedToken, { complete: true });
         let jwk = await getJwkByKid(token.payload.iss, token.header.kid);
         let pem = jwkToPem(jwk);
         jwt.verify(encodedToken, pem);
-        
+
         return allowPolicy(event.methodArn);
     } catch (error) {
         console.error(error.message);
@@ -23,18 +23,18 @@ function getEncodedToken(header) {
 }
 
 async function getJwkByKid(iss, kid) {
-  let jwksendpoint = iss + "/.well-known/jwks.json";
-  let json = await axios(jwksendpoint);
+    let jwksendpoint = iss + "/.well-known/jwks.json";
+    let json = await axios(jwksendpoint);
 
-  for (let index = 0; index < json.data.keys.length; index++) {
-    let key = json.data.keys[index];
+    for (let index = 0; index < json.data.keys.length; index++) {
+        let key = json.data.keys[index];
 
-    if(key.kid === kid)
-      return key;
-  }
+        if (key.kid === kid)
+            return key;
+    }
 }
 
-function denyAllPolicy(){
+function denyAllPolicy() {
     return {
         "principalId": "*",
         "policyDocument": {
@@ -50,7 +50,7 @@ function denyAllPolicy(){
     }
 }
 
-function allowPolicy(methodArn){
+function allowPolicy(methodArn) {
     return {
         "principalId": "apigateway.amazonaws.com",
         "policyDocument": {
