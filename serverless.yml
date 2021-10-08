@@ -21,31 +21,30 @@ provider:
         - dynamodb:PutItem
       Resource: "*"
 
-  # httpApi:
-  #   authorizers:
-  #     serviceAuthorizer:
-  #       identitySource: $request.header.Authorization
-  #       issuerUrl: 
-  #         Fn::Join:
-  #         - ''
-  #         - - 'https://cognito-idp.'
-  #           - '${opt:region, self:provider.region}'
-  #           - '.amazonaws.com/'
-  #           - Ref: serviceUserPool
-  #       audience:
-  #         - Ref: serviceUserPoolClient
-
 functions:
+  tokenValidate:
+    handler: api/tokenValidate.handler
+
+  publicEndpoint:
+    handler: api/public.list
+    memorySize: 128
+    description: Lista candidates public.
+    events:
+      - http:
+          path: api/public
+          method: get
+          cors: true
+
   candidateSubmission:
     handler: api/candidate.submit
     memorySize: 128
     description: Submit candidate information and starts interview process.
     events:
       - http: 
-          path: candidates
+          path: api/candidates
           method: post
           cors: true
-          # authorizer: serviceAuthorizer
+          authorizer: tokenValidate
 
   listCandidates:
     handler: api/candidate.list
@@ -53,19 +52,21 @@ functions:
     description: List all candidates
     events:
       - http: 
-          path: candidates
+          path: api/candidates
           method: get
           cors: true
-          # authorizer: serviceAuthorizer
+          authorizer: tokenValidate
 
   candidateDetails:
     handler: api/candidate.get
+    memorySize: 128
+    description: List id candidate
     events:
       - http:
-          path: candidates/{id}
+          path: api/candidates/{id}
           method: get
           cors: true
-          # authorizer: serviceAuthorizer        
+          authorizer: tokenValidate        
 
 resources:
   Resources:
