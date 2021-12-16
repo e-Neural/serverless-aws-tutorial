@@ -12,7 +12,8 @@ provider:
     CANDIDATE_TABLE: "candidate-${opt:stage, self:provider.stage}"
     CANDIDATE_EMAIL_TABLE: "candidate-email-${opt:stage, self:provider.stage}"
     CHAT_TABLE: "chat-${opt:stage, self:provider.stage}"
-    API_REGION: "${self:provider.region}" 
+    API_REGION: "${self:provider.region}"
+    ENE_CONFIG: ${ssm:/dev/e-neural/config}
   iamRoleStatements:
     # - Effect: Allow
     #   Action:
@@ -25,6 +26,9 @@ provider:
         - dynamodb:Scan
         - dynamodb:GetItem
         - dynamodb:PutItem
+        - ssm:Describe*
+        - ssm:Get*
+        - ssm:List*
       Resource: "*"
 
   # optional
@@ -35,8 +39,15 @@ provider:
   # from the websocket event types on your function
   websocketsApiRouteSelectionExpression: $request.body.action
 
-# plugins:
-#   - serverless-websockets-plugin
+plugins:
+  # - serverless-ssm-fetch
+  - serverless-websockets-plugin
+  # - serverless-dotenv-plugin
+
+
+custom:
+  serverlessSsmFetch:
+    ENE_CONFIG: /dev/e-neural/config
 
 functions:
   tokenValidate:

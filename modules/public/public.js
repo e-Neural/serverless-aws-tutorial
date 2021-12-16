@@ -18,7 +18,9 @@ module.exports.list = (event, context, callback) => {
         } else {
             console.log("Scan succeeded.");
             return callback(null, successResponseBuilder(JSON.stringify({
-                    candidates: data.Items
+                    candidates: data.Items,
+                    config: process.env.ENE_CONFIG,
+                    region: process.env.AWS_REGION,
                 })
             ));
         }
