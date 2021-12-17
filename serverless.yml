@@ -13,7 +13,9 @@ provider:
     CANDIDATE_EMAIL_TABLE: "candidate-email-${opt:stage, self:provider.stage}"
     CHAT_TABLE: "chat-${opt:stage, self:provider.stage}"
     API_REGION: "${self:provider.region}"
+    # Variavel de Ambiente
     ENE_CONFIG: ${ssm:/dev/e-neural/config}
+    ENE_PRIVATE_KEY: "{{resolve:secretsmanager:dev/e-neural::private_key}}"
   iamRoleStatements:
     # - Effect: Allow
     #   Action:
